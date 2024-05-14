@@ -9,15 +9,15 @@ ENV LANG en_US.UTF-8
 # Retrieve the target architecture to install the correct wkhtmltopdf package
 ARG TARGETARCH
 
-# Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
+# Install some deps, lessc and less-plugin-clean-css, wkhtmltopdf and fail2ban
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
-        fail2ban \
         ca-certificates \
         curl \
         dirmngr \
+        fail2ban \
         fonts-noto-cjk \
         gnupg \
         libssl-dev \
@@ -101,5 +101,13 @@ COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
 # Set default user when running the container
 USER odoo
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Copy custom Fail2ban configurations
+COPY ./odoo_login.conf /etc/fail2ban/filter.d/odoo_login.conf
+COPY ./odoo_login.conf /etc/fail2ban/jail.d/odoo_login.conf
+
+# Configure and start Fail2ban service
+RUN sed -i 's/enabled = true/enabled = false/' /etc/fail2ban/jail.d/defaults-debian.conf
+
+ENTRYPOINT service fail2ban start && /entrypoint.sh
+
 CMD ["odoo"]
