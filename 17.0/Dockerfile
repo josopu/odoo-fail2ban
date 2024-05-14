@@ -102,8 +102,8 @@ COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
 USER odoo
 
 # Copy custom Fail2ban configurations
-COPY ./filter.d/odoo_login.conf /etc/fail2ban/filter.d/odoo_login.conf
-COPY ./jail.d/odoo_login.conf /etc/fail2ban/jail.d/odoo_login.conf
+COPY ./fail2ban/filter.d/odoo_login.conf /etc/fail2ban/filter.d/odoo_login.conf
+COPY ./fail2ban/jail.d/odoo_login.conf /etc/fail2ban/jail.d/odoo_login.conf
 
 # Configure and start Fail2ban service
 RUN sed -i 's/enabled = true/enabled = false/' /etc/fail2ban/jail.d/defaults-debian.conf
