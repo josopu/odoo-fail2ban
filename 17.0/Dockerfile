@@ -1,5 +1,4 @@
 FROM ubuntu:jammy
-MAINTAINER Odoo S.A. <info@odoo.com>
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
@@ -58,7 +57,7 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ jammy-pgdg main' > /etc/a
     && GNUPGHOME="$(mktemp -d)" \
     && export GNUPGHOME \
     && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
-    && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${repokey}" \
+    && gpg --batch --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "${repokey}" \
     && gpg --batch --armor --export "${repokey}" > /etc/apt/trusted.gpg.d/pgdg.gpg.asc \
     && gpgconf --kill all \
     && rm -rf "$GNUPGHOME" \
@@ -104,9 +103,7 @@ USER odoo
 # Copy custom Fail2ban configurations
 COPY ./fail2ban/filter.d/odoo_login.conf /etc/fail2ban/filter.d/odoo_login.conf
 COPY ./fail2ban/jail.d/odoo_login.conf /etc/fail2ban/jail.d/odoo_login.conf
-
-# Configure and start Fail2ban service
-RUN sed -i 's/enabled = true/enabled = false/' /etc/fail2ban/jail.d/defaults-debian.conf
+COPY ./fail2ban/jail.d/defaults-debian.conf /etc/fail2ban/jail.d/defaults-debian.conf
 
 ENTRYPOINT service fail2ban start && /entrypoint.sh
 
